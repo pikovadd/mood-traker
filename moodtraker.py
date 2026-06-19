@@ -11,6 +11,14 @@ DATA_FILE = "mood_data.json"
 PROFILE_FILE = "profile.json"
 MAX_COMMENT_LENGTH = 200
 
+# кнопки навигации
+nav_buttons_list = [
+    ("помощь", "show_help_screen"),
+    ("сегодня", "show_today_screen"),
+    ("календарь", "show_history_screen"),
+    ("аналитика", "show_analytics_screen")
+]
+
 
 # путь к файлу данных
 def get_data_path():
@@ -119,20 +127,16 @@ class MoodTrackerApp:
             widget.destroy()
 
     def create_nav_bar(self):
-        # создание навигационной панели
+        """создает навигационную панель"""
         nav_frame = tk.Frame(self.root, bg="#f0f0f0", height=50)
         nav_frame.pack(fill='x', pady=0)
         nav_frame.pack_propagate(False)
 
-        # кнопки навигации
-        nav_buttons = [
-            ("помощь", self.show_help_screen),
-            ("сегодня", self.show_today_screen),
-            ("календарь", self.show_history_screen),
-            ("аналитика", self.show_analytics_screen)
-        ]
+        # проходим по списку кнопок
+        for text, method_name in nav_buttons_list:
+            # получаем метод по имени
+            command = getattr(self, method_name)
 
-        for text, command in nav_buttons:
             btn = tk.Button(
                 nav_frame,
                 text=text,
@@ -318,7 +322,6 @@ class MoodTrackerApp:
    нажмите на запись в календаре -> измените данные -> 
    нажмите "сохранить" или "удалить" """
 
-
         help_label = tk.Label(
             content_frame,
             text=help_text,
@@ -363,7 +366,7 @@ class MoodTrackerApp:
             ("так себе", "#FFC107")
         ]
 
-        for i, (label, color) in enumerate(moods):
+        for label, color in moods:
             rb = tk.Radiobutton(
                 mood_frame,
                 text=label,
