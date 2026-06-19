@@ -33,9 +33,18 @@ class MoodTrackerApp:
         self.root = root
         self.root.title(APP_NAME)
 
-        # окно пошире
-        self.root.geometry("700x700")
+        self.root.geometry("1100x700")
         self.root.resizable(False, False)
+
+        # загружаем картинки для настроений
+        self.mood_images = {}
+        try:
+            self.mood_images["отлично"] = tk.PhotoImage(file="happy.png")
+            self.mood_images["хорошо"] = tk.PhotoImage(file="good.png")
+            self.mood_images["так себе"] = tk.PhotoImage(file="okay.png")
+        except Exception as e:
+            print(f"не удалось загрузить картинки: {e}")
+            # если картинок нет - работаем без них
 
         # хранилище данных
         self.data_path = get_data_path()
@@ -248,7 +257,7 @@ class MoodTrackerApp:
     def on_start_click(self):
         name = self.name_entry.get().strip()
         if name:
-            self.user_name = name
+            self.user_name = name.title()
             self.save_profile()
             self.show_main_screen()
         else:
@@ -361,22 +370,33 @@ class MoodTrackerApp:
         ]
 
         for label, color in moods:
+            # рамка для картинки
+            frame = tk.Frame(mood_frame, bg=color, relief='ridge', bd=3, padx=15, pady=10)
+            frame.pack(side='left', padx=10, expand=True, fill='both')
+
+            # если есть картинка - показываем её
+            if label in self.mood_images:
+                img_label = tk.Label(frame, image=self.mood_images[label], bg=color)
+                img_label.pack(pady=5)
+            else:
+                # если картинки нет - показываем текст
+                text_label = tk.Label(frame, text=label, font=("Arial", 16), bg=color)
+                text_label.pack(pady=5)
+
+            # радиокнопка (текст под картинкой)
             rb = tk.Radiobutton(
-                mood_frame,
+                frame,
                 text=label,
-                font=("Arial", 16),
+                font=("Arial", 12, "bold"),
                 variable=self.selected_mood,
                 value=label,
                 bg=color,
-                padx=20,
-                pady=15,
-                relief='ridge',
-                bd=2,
-                selectcolor='white',
-                indicatoron=False,
+                fg="white",
+                selectcolor=color,
+                indicatoron=True,
                 cursor='hand2'
             )
-            rb.pack(side='left', padx=10, expand=True, fill='both')
+            rb.pack(pady=5)
 
         add_btn = tk.Button(
             content_frame,
@@ -551,14 +571,23 @@ class MoodTrackerApp:
         top_frame = tk.Frame(card, bg="white")
         top_frame.pack(fill='x')
 
+        # левая часть - картинка
+        left_frame = tk.Frame(top_frame, bg="white")
+        left_frame.pack(side='left')
+
+        if mood in self.mood_images:
+            img = tk.Label(left_frame, image=self.mood_images[mood], bg="white")
+            img.pack(side='left')
+
+        # название настроения
         mood_label = tk.Label(
-            top_frame,
+            left_frame,
             text=mood,
             font=("Arial", 14, "bold"),
             bg="white",
             fg=color
         )
-        mood_label.pack(side='left')
+        mood_label.pack(side='left', padx=(5, 0))
 
         date_label = tk.Label(
             top_frame,
@@ -576,7 +605,7 @@ class MoodTrackerApp:
                 text=comment,
                 font=("Arial", 10),
                 bg="white",
-                wraplength=350,
+                wraplength=600,
                 justify='left'
             )
             comment_label.pack(anchor='w', pady=(3, 0))
