@@ -71,7 +71,6 @@ class MoodTrackerApp:
 
     # работа с данными
     def load_profile(self):
-        # загрузка профиля пользователя
         try:
             if self.profile_file.exists():
                 with open(self.profile_file, 'r', encoding='utf-8') as f:
@@ -81,7 +80,6 @@ class MoodTrackerApp:
             self.user_name = ""
 
     def save_profile(self):
-        # сохранение профиля пользователя
         try:
             with open(self.profile_file, 'w', encoding='utf-8') as f:
                 json.dump({'name': self.user_name}, f, ensure_ascii=False, indent=2)
@@ -89,7 +87,6 @@ class MoodTrackerApp:
             print(f"ошибка сохранения профиля: {e}")
 
     def load_records(self):
-        # загрузка записей из файла
         try:
             if self.data_file.exists():
                 with open(self.data_file, 'r', encoding='utf-8') as f:
@@ -100,7 +97,6 @@ class MoodTrackerApp:
             self.mood_records = []
 
     def save_records(self):
-        # сохранение записей в файл
         try:
             with open(self.data_file, 'w', encoding='utf-8') as f:
                 json.dump(self.mood_records, f, ensure_ascii=False, indent=2)
@@ -108,7 +104,6 @@ class MoodTrackerApp:
             messagebox.showerror("ошибка", f"не удалось сохранить данные: {e}")
 
     def get_records_for_period(self, days):
-        # получение записей за указанное количество дней
         cutoff_date = datetime.now() - timedelta(days=days)
         result = []
         for record in self.mood_records:
@@ -122,21 +117,16 @@ class MoodTrackerApp:
 
     # экраны
     def clear_screen(self):
-        # очистка главного окна
         for widget in self.root.winfo_children():
             widget.destroy()
 
     def create_nav_bar(self):
-        """создает навигационную панель"""
         nav_frame = tk.Frame(self.root, bg="#f0f0f0", height=50)
         nav_frame.pack(fill='x', pady=0)
         nav_frame.pack_propagate(False)
 
-        # проходим по списку кнопок
         for text, method_name in nav_buttons_list:
-            # получаем метод по имени
             command = getattr(self, method_name)
-
             btn = tk.Button(
                 nav_frame,
                 text=text,
@@ -149,7 +139,6 @@ class MoodTrackerApp:
             )
             btn.pack(side='left', expand=True, fill='both')
 
-        # кнопка выхода из полноэкранного режима
         exit_btn = tk.Button(
             nav_frame,
             text="✕",
@@ -164,15 +153,36 @@ class MoodTrackerApp:
 
         return nav_frame
 
+    def create_style_button(self, parent, text, color, command):
+        btn = tk.Button(
+            parent,
+            text=text,
+            font=("Arial", 18, "bold"),
+            bg=color,
+            fg="white",
+            padx=60,
+            pady=20,
+            relief='flat',
+            cursor='hand2',
+            command=command
+        )
+        return btn
+
+    def create_window(self, title, width=500, height=400):
+        window = tk.Toplevel(self.root)
+        window.title(title)
+        window.geometry(f"{width}x{height}")
+        window.resizable(False, False)
+        window.grab_set()
+        window.transient(self.root)
+        return window
+
     def show_welcome_screen(self):
-        # отображение начального экрана
         self.clear_screen()
 
-        # фрейм для центрирования
         main_frame = tk.Frame(self.root, bg="#ffffff")
         main_frame.pack(expand=True, fill='both')
 
-        # заголовок
         title_label = tk.Label(
             main_frame,
             text="как тебя зовут?",
@@ -182,7 +192,6 @@ class MoodTrackerApp:
         )
         title_label.pack()
 
-        # поле ввода имени
         self.name_entry = tk.Entry(
             main_frame,
             font=("Arial", 24),
@@ -196,7 +205,6 @@ class MoodTrackerApp:
         self.name_entry.pack(pady=20, ipady=10)
         self.name_entry.focus()
 
-        # кнопка "начать"
         start_btn = tk.Button(
             main_frame,
             text="начать",
@@ -211,7 +219,6 @@ class MoodTrackerApp:
         )
         start_btn.pack(pady=30)
 
-        # информация о полноэкранном режиме
         info_label = tk.Label(
             main_frame,
             text="F11 - полноэкранный режим / Esc - выход",
@@ -221,11 +228,9 @@ class MoodTrackerApp:
         )
         info_label.pack(side='bottom', pady=10)
 
-        # обработка Enter
         self.root.bind('<Return>', lambda e: self.on_start_click())
 
     def on_start_click(self):
-        # обработчик кнопки начать
         name = self.name_entry.get().strip()
         if name:
             self.user_name = name
@@ -235,18 +240,14 @@ class MoodTrackerApp:
             messagebox.showwarning("внимание", "пожалуйста, введите ваше имя")
 
     def show_main_screen(self):
-        # отображение главного экрана
         self.clear_screen()
         self.load_records()
 
-        # навигационная панель
         self.create_nav_bar()
 
-        # основной контент
         content_frame = tk.Frame(self.root, bg="#ffffff")
         content_frame.pack(expand=True, fill='both', padx=40, pady=40)
 
-        # приветствие
         greeting = tk.Label(
             content_frame,
             text=f"привет, {self.user_name}! :)",
@@ -264,11 +265,9 @@ class MoodTrackerApp:
         )
         question.pack(pady=20)
 
-        # кнопки быстрого перехода
         btn_frame = tk.Frame(content_frame, bg="#ffffff")
         btn_frame.pack(pady=40)
 
-        # создаем стильные кнопки
         buttons = [
             ("сегодня", "#2196F3", self.show_today_screen),
             ("календарь", "#FF9800", self.show_history_screen),
@@ -276,29 +275,15 @@ class MoodTrackerApp:
         ]
 
         for text, color, command in buttons:
-            btn = tk.Button(
-                btn_frame,
-                text=text,
-                font=("Arial", 18, "bold"),
-                bg=color,
-                fg="white",
-                padx=60,
-                pady=20,
-                relief='flat',
-                cursor='hand2',
-                command=command
-            )
+            btn = self.create_style_button(btn_frame, text, color, command)
             btn.pack(side='left', padx=20, expand=True, fill='x')
 
     def show_help_screen(self):
-        # отображение раздела помощь
         self.clear_screen()
         self.load_records()
 
-        # навигационная панель
         self.create_nav_bar()
 
-        # основной контент
         content_frame = tk.Frame(self.root, bg="#ffffff")
         content_frame.pack(expand=True, fill='both', padx=40, pady=30)
 
@@ -333,18 +318,14 @@ class MoodTrackerApp:
         help_label.pack(expand=True)
 
     def show_today_screen(self):
-        # отображение раздела сегодня
         self.clear_screen()
         self.load_records()
 
-        # навигационная панель
         self.create_nav_bar()
 
-        # основной контент
         content_frame = tk.Frame(self.root, bg="#ffffff")
         content_frame.pack(expand=True, fill='both', padx=40, pady=30)
 
-        # заголовок
         title = tk.Label(
             content_frame,
             text="# как прошел день?",
@@ -353,11 +334,9 @@ class MoodTrackerApp:
         )
         title.pack(pady=20)
 
-        # выбор настроения
         mood_frame = tk.Frame(content_frame, bg="#ffffff")
         mood_frame.pack(pady=30)
 
-        # варианты настроения
         self.selected_mood = tk.StringVar(value="")
 
         moods = [
@@ -384,7 +363,6 @@ class MoodTrackerApp:
             )
             rb.pack(side='left', padx=15, expand=True, fill='both')
 
-        # кнопка добавления заметки
         add_btn = tk.Button(
             content_frame,
             text="добавить заметку",
@@ -400,22 +378,12 @@ class MoodTrackerApp:
         add_btn.pack(pady=30)
 
     def show_add_comment_screen(self):
-        # отображение окна добавления комментария
         if not self.selected_mood.get():
             messagebox.showwarning("внимание", "пожалуйста, выберите настроение")
             return
 
-        # создаем новое окно
-        comment_window = tk.Toplevel(self.root)
-        comment_window.title("добавление заметки")
-        comment_window.geometry("500x400")
-        comment_window.resizable(False, False)
-        comment_window.grab_set()
+        comment_window = self.create_window("добавление заметки", 500, 400)
 
-        # настройка центрирования окна
-        comment_window.transient(self.root)
-
-        # заголовок
         title = tk.Label(
             comment_window,
             text="опиши свой день",
@@ -423,7 +391,6 @@ class MoodTrackerApp:
         )
         title.pack(pady=15)
 
-        # текстовое поле
         text_area = tk.Text(
             comment_window,
             font=("Arial", 14),
@@ -436,7 +403,6 @@ class MoodTrackerApp:
         text_area.pack(pady=15, padx=30)
         text_area.focus()
 
-        # счетчик символов
         char_count = tk.Label(
             comment_window,
             text=f"0/{MAX_COMMENT_LENGTH}",
@@ -453,7 +419,6 @@ class MoodTrackerApp:
 
         text_area.bind('<KeyRelease>', update_char_count)
 
-        # кнопки
         btn_frame = tk.Frame(comment_window)
         btn_frame.pack(pady=20)
 
@@ -489,19 +454,16 @@ class MoodTrackerApp:
         cancel_btn.pack(side='left', padx=10)
 
     def save_mood_record(self, comment, window):
-        # сохранение записи о настроении
         mood = self.selected_mood.get()
 
         if not mood:
             messagebox.showwarning("внимание", "выберите настроение")
             return
 
-        # проверка длины комментария
         if len(comment) > MAX_COMMENT_LENGTH:
             messagebox.showwarning("внимание", f"комментарий не может превышать {MAX_COMMENT_LENGTH} символов")
             return
 
-        # создание записи
         record = {
             'id': datetime.now().strftime("%Y%m%d%H%M%S%f"),
             'mood': mood,
@@ -514,23 +476,17 @@ class MoodTrackerApp:
 
         window.destroy()
         messagebox.showinfo("успех", "запись сохранена!")
-
-        # возврат на главный экран
         self.show_main_screen()
 
     def show_history_screen(self):
-        # отображение раздела календарь/история
         self.clear_screen()
         self.load_records()
 
-        # навигационная панель
         self.create_nav_bar()
 
-        # основной контент
         content_frame = tk.Frame(self.root, bg="#ffffff")
         content_frame.pack(expand=True, fill='both', padx=40, pady=20)
 
-        # заголовок
         title = tk.Label(
             content_frame,
             text="календарь настроения",
@@ -539,7 +495,6 @@ class MoodTrackerApp:
         )
         title.pack(pady=10)
 
-        # подзаголовок
         subtitle = tk.Label(
             content_frame,
             text="(за последний месяц)",
@@ -549,11 +504,9 @@ class MoodTrackerApp:
         )
         subtitle.pack()
 
-        # контейнер для списка записей
         list_frame = tk.Frame(content_frame, bg="#ffffff")
         list_frame.pack(expand=True, fill='both', pady=10)
 
-        # создаем Canvas с прокруткой
         canvas = tk.Canvas(list_frame, bg="#ffffff", highlightthickness=0)
         scrollbar = tk.Scrollbar(list_frame, orient='vertical', command=canvas.yview)
         scrollable_frame = tk.Frame(canvas, bg="#ffffff")
@@ -566,7 +519,6 @@ class MoodTrackerApp:
         canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
 
-        # отображение записей за последний месяц
         records = self.get_records_for_period(30)
 
         if not records:
@@ -579,9 +531,7 @@ class MoodTrackerApp:
             )
             no_data.pack(pady=40)
         else:
-            # сортируем по дате (новые сверху)
             records.sort(key=lambda x: x.get('date', ''), reverse=True)
-
             for record in records:
                 self.create_history_card(scrollable_frame, record)
 
@@ -589,7 +539,6 @@ class MoodTrackerApp:
         scrollbar.pack(side='right', fill='y')
 
     def create_history_card(self, parent, record):
-        # создание карточки записи в истории
         mood_colors = {
             "отлично": "#4CAF50",
             "хорошо": "#8BC34A",
@@ -599,7 +548,6 @@ class MoodTrackerApp:
         mood = record.get('mood', '')
         color = mood_colors.get(mood, "#FFC107")
 
-        # карточка
         card = tk.Frame(
             parent,
             bg="white",
@@ -610,7 +558,6 @@ class MoodTrackerApp:
         )
         card.pack(fill='x', pady=5)
 
-        # настроение и дата
         top_frame = tk.Frame(card, bg="white")
         top_frame.pack(fill='x')
 
@@ -632,7 +579,6 @@ class MoodTrackerApp:
         )
         date_label.pack(side='right')
 
-        # комментарий
         comment = record.get('comment', '')
         if comment:
             comment_label = tk.Label(
@@ -645,7 +591,6 @@ class MoodTrackerApp:
             )
             comment_label.pack(anchor='w', pady=(5, 0))
 
-        # кнопка для редактирования
         edit_btn = tk.Button(
             card,
             text="редактировать",
@@ -659,19 +604,10 @@ class MoodTrackerApp:
         edit_btn.pack(anchor='e', pady=(5, 0))
 
     def show_edit_record_screen(self, record):
-        # отображение окна редактирования записи
-        # сохраняем ID текущей записи
         self.current_record_id = record.get('id')
 
-        # создаем окно редактирования
-        edit_window = tk.Toplevel(self.root)
-        edit_window.title("внесенная запись")
-        edit_window.geometry("500x450")
-        edit_window.resizable(False, False)
-        edit_window.grab_set()
-        edit_window.transient(self.root)
+        edit_window = self.create_window("внесенная запись", 500, 450)
 
-        # заголовок
         title = tk.Label(
             edit_window,
             text="редактирование записи",
@@ -679,7 +615,6 @@ class MoodTrackerApp:
         )
         title.pack(pady=15)
 
-        # выбор настроения
         mood_frame = tk.Frame(edit_window)
         mood_frame.pack(pady=15)
 
@@ -692,11 +627,7 @@ class MoodTrackerApp:
 
         selected_mood_edit = tk.StringVar(value=record.get('mood', ''))
 
-        moods = [
-            "отлично",
-            "хорошо",
-            "так себе"
-        ]
+        moods = ["отлично", "хорошо", "так себе"]
 
         for label in moods:
             rb = tk.Radiobutton(
@@ -710,7 +641,6 @@ class MoodTrackerApp:
             )
             rb.pack(side='left', padx=10)
 
-        # текстовое поле для комментария
         comment_label = tk.Label(
             edit_window,
             text="комментарий:",
@@ -730,7 +660,6 @@ class MoodTrackerApp:
         text_area.insert("1.0", record.get('comment', ''))
         text_area.pack(pady=5, padx=30)
 
-        # кнопки
         btn_frame = tk.Frame(edit_window)
         btn_frame.pack(pady=20)
 
@@ -782,7 +711,6 @@ class MoodTrackerApp:
         cancel_btn.pack(side='left', padx=10)
 
     def update_record(self, record, mood, comment, window):
-        # обновление записи
         if not mood:
             messagebox.showwarning("внимание", "выберите настроение")
             return
@@ -791,7 +719,6 @@ class MoodTrackerApp:
             messagebox.showwarning("внимание", f"комментарий не может превышать {MAX_COMMENT_LENGTH} символов")
             return
 
-        # находим запись и обновляем
         for r in self.mood_records:
             if r.get('id') == record.get('id'):
                 r['mood'] = mood
@@ -804,7 +731,6 @@ class MoodTrackerApp:
         self.show_history_screen()
 
     def delete_record(self, record, window):
-        # удаление записи
         if messagebox.askyesno("подтверждение", "вы уверены, что хотите удалить эту запись?"):
             self.mood_records = [r for r in self.mood_records if r.get('id') != record.get('id')]
             self.save_records()
@@ -813,18 +739,14 @@ class MoodTrackerApp:
             self.show_history_screen()
 
     def show_analytics_screen(self):
-        # отображение раздела аналитика
         self.clear_screen()
         self.load_records()
 
-        # навигационная панель
         self.create_nav_bar()
 
-        # основной контент
         content_frame = tk.Frame(self.root, bg="#ffffff")
         content_frame.pack(expand=True, fill='both', padx=40, pady=20)
 
-        # заголовок
         title = tk.Label(
             content_frame,
             text="аналитика",
@@ -833,7 +755,6 @@ class MoodTrackerApp:
         )
         title.pack(pady=10)
 
-        # выбор периода
         period_frame = tk.Frame(content_frame, bg="#ffffff")
         period_frame.pack(pady=15)
 
@@ -871,16 +792,12 @@ class MoodTrackerApp:
         )
         month_btn.pack(side='left', padx=15)
 
-        # контейнер для графика
         self.analytics_container = tk.Frame(content_frame, bg="#ffffff")
         self.analytics_container.pack(expand=True, fill='both', pady=15)
 
-        # отображение данных за неделю по умолчанию
         self.show_analytics_period()
 
     def show_analytics_period(self):
-        # отображение статистики за выбранный период
-        # очищаем контейнер
         for widget in self.analytics_container.winfo_children():
             widget.destroy()
 
@@ -900,7 +817,6 @@ class MoodTrackerApp:
             no_data.pack(expand=True)
             return
 
-        # подсчет статистики
         mood_counts = {
             "отлично": 0,
             "хорошо": 0,
@@ -914,7 +830,6 @@ class MoodTrackerApp:
 
         total = sum(mood_counts.values())
 
-        # заголовок периода
         period_label = tk.Label(
             self.analytics_container,
             text=f"статистика за {period}",
@@ -923,30 +838,24 @@ class MoodTrackerApp:
         )
         period_label.pack(pady=5)
 
-        # создание простой гистограммы
         chart_frame = tk.Frame(self.analytics_container, bg="#ffffff")
         chart_frame.pack(expand=True, fill='both', pady=15)
 
-        # максимальное значение для масштабирования
         max_count = max(mood_counts.values()) if max(mood_counts.values()) > 0 else 1
 
-        # цвета для настроений
         colors = {
             "отлично": "#4CAF50",
             "хорошо": "#8BC34A",
             "так себе": "#FFC107"
         }
 
-        # создаем столбцы
         for mood, count in mood_counts.items():
             frame = tk.Frame(chart_frame, bg="#ffffff")
             frame.pack(side='left', expand=True, fill='both', padx=10)
 
-            # высота столбца (макс 250px)
             height = int((count / max_count) * 200) if max_count > 0 else 0
             height = max(height, 10) if count > 0 else 0
 
-            # столбец
             bar = tk.Frame(
                 frame,
                 bg=colors.get(mood, "#9E9E9E"),
@@ -955,7 +864,6 @@ class MoodTrackerApp:
             )
             bar.pack(side='bottom', pady=5)
 
-            # количество
             count_label = tk.Label(
                 frame,
                 text=str(count),
@@ -964,7 +872,6 @@ class MoodTrackerApp:
             )
             count_label.pack()
 
-            # название
             mood_label = tk.Label(
                 frame,
                 text=mood,
@@ -973,7 +880,6 @@ class MoodTrackerApp:
             )
             mood_label.pack()
 
-        # общее количество записей
         total_label = tk.Label(
             self.analytics_container,
             text=f"всего записей: {total}",
@@ -985,7 +891,6 @@ class MoodTrackerApp:
 
 
 def main():
-    # точка входа в приложение
     root = tk.Tk()
     app = MoodTrackerApp(root)
     root.mainloop()
