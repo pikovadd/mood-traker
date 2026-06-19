@@ -33,17 +33,9 @@ class MoodTrackerApp:
         self.root = root
         self.root.title(APP_NAME)
 
-        # полноэкранный режим
-        self.root.attributes('-fullscreen', True)
-
-        # настройка размера и веса для адаптивности
-        self.root.grid_rowconfigure(0, weight=1)
-        self.root.grid_columnconfigure(0, weight=1)
-
-        # переменная для отслеживания полноэкранного режима
-        self.fullscreen = True
-        self.root.bind("<F11>", self.toggle_fullscreen)
-        self.root.bind("<Escape>", self.toggle_fullscreen)
+        # окно пошире
+        self.root.geometry("700x700")
+        self.root.resizable(False, False)
 
         # хранилище данных
         self.data_path = get_data_path()
@@ -63,11 +55,6 @@ class MoodTrackerApp:
             self.show_main_screen()
         else:
             self.show_welcome_screen()
-
-    def toggle_fullscreen(self, event=None):
-        self.fullscreen = not self.fullscreen
-        self.root.attributes('-fullscreen', self.fullscreen)
-        return "break"
 
     # работа с данными
     def load_profile(self):
@@ -130,26 +117,14 @@ class MoodTrackerApp:
             btn = tk.Button(
                 nav_frame,
                 text=text,
-                font=("Arial", 14),
+                font=("Arial", 12),
                 bg="#f0f0f0",
                 bd=0,
-                padx=20,
-                pady=10,
+                padx=15,
+                pady=8,
                 command=command
             )
             btn.pack(side='left', expand=True, fill='both')
-
-        exit_btn = tk.Button(
-            nav_frame,
-            text="✕",
-            font=("Arial", 14),
-            bg="#f0f0f0",
-            bd=0,
-            padx=20,
-            pady=10,
-            command=self.toggle_fullscreen
-        )
-        exit_btn.pack(side='right')
 
         return nav_frame
 
@@ -157,11 +132,11 @@ class MoodTrackerApp:
         btn = tk.Button(
             parent,
             text=text,
-            font=("Arial", 18, "bold"),
+            font=("Arial", 14, "bold"),
             bg=color,
             fg="white",
-            padx=60,
-            pady=20,
+            padx=30,
+            pady=12,
             relief='flat',
             cursor='hand2',
             command=command
@@ -177,6 +152,55 @@ class MoodTrackerApp:
         window.transient(self.root)
         return window
 
+    def create_action_buttons(self, parent, save_command, cancel_command, delete_command=None):
+        btn_frame = tk.Frame(parent)
+        btn_frame.pack(pady=20)
+
+        save_btn = tk.Button(
+            btn_frame,
+            text="сохранить",
+            font=("Arial", 12, "bold"),
+            bg="#4CAF50",
+            fg="white",
+            padx=20,
+            pady=8,
+            relief='flat',
+            cursor='hand2',
+            command=save_command
+        )
+        save_btn.pack(side='left', padx=10)
+
+        if delete_command:
+            delete_btn = tk.Button(
+                btn_frame,
+                text="удалить",
+                font=("Arial", 12, "bold"),
+                bg="#f44336",
+                fg="white",
+                padx=20,
+                pady=8,
+                relief='flat',
+                cursor='hand2',
+                command=delete_command
+            )
+            delete_btn.pack(side='left', padx=10)
+
+        cancel_btn = tk.Button(
+            btn_frame,
+            text="отмена",
+            font=("Arial", 12),
+            bg="#9E9E9E",
+            fg="white",
+            padx=20,
+            pady=8,
+            relief='flat',
+            cursor='hand2',
+            command=cancel_command
+        )
+        cancel_btn.pack(side='left', padx=10)
+
+        return btn_frame
+
     def show_welcome_screen(self):
         self.clear_screen()
 
@@ -186,7 +210,7 @@ class MoodTrackerApp:
         title_label = tk.Label(
             main_frame,
             text="как тебя зовут?",
-            font=("Arial", 32, "bold"),
+            font=("Arial", 24, "bold"),
             bg="#ffffff",
             pady=30
         )
@@ -194,7 +218,7 @@ class MoodTrackerApp:
 
         self.name_entry = tk.Entry(
             main_frame,
-            font=("Arial", 24),
+            font=("Arial", 18),
             width=20,
             justify='center',
             bd=0,
@@ -202,31 +226,22 @@ class MoodTrackerApp:
             highlightthickness=2,
             highlightcolor="#4CAF50"
         )
-        self.name_entry.pack(pady=20, ipady=10)
+        self.name_entry.pack(pady=20, ipady=8)
         self.name_entry.focus()
 
         start_btn = tk.Button(
             main_frame,
             text="начать",
-            font=("Arial", 18, "bold"),
+            font=("Arial", 16, "bold"),
             bg="#4CAF50",
             fg="white",
-            padx=50,
-            pady=15,
+            padx=40,
+            pady=12,
             relief='flat',
             cursor='hand2',
             command=self.on_start_click
         )
         start_btn.pack(pady=30)
-
-        info_label = tk.Label(
-            main_frame,
-            text="F11 - полноэкранный режим / Esc - выход",
-            font=("Arial", 10),
-            fg="gray",
-            bg="#ffffff"
-        )
-        info_label.pack(side='bottom', pady=10)
 
         self.root.bind('<Return>', lambda e: self.on_start_click())
 
@@ -246,27 +261,27 @@ class MoodTrackerApp:
         self.create_nav_bar()
 
         content_frame = tk.Frame(self.root, bg="#ffffff")
-        content_frame.pack(expand=True, fill='both', padx=40, pady=40)
+        content_frame.pack(expand=True, fill='both', padx=20, pady=20)
 
         greeting = tk.Label(
             content_frame,
             text=f"привет, {self.user_name}! :)",
-            font=("Arial", 36, "bold"),
+            font=("Arial", 28, "bold"),
             bg="#ffffff"
         )
-        greeting.pack(pady=20)
+        greeting.pack(pady=15)
 
         question = tk.Label(
             content_frame,
             text="как твое настроение\nсегодня? :)",
-            font=("Arial", 24),
+            font=("Arial", 18),
             bg="#ffffff",
             justify='center'
         )
-        question.pack(pady=20)
+        question.pack(pady=15)
 
         btn_frame = tk.Frame(content_frame, bg="#ffffff")
-        btn_frame.pack(pady=40)
+        btn_frame.pack(pady=25)
 
         buttons = [
             ("сегодня", "#2196F3", self.show_today_screen),
@@ -276,7 +291,7 @@ class MoodTrackerApp:
 
         for text, color, command in buttons:
             btn = self.create_style_button(btn_frame, text, color, command)
-            btn.pack(side='left', padx=20, expand=True, fill='x')
+            btn.pack(side='left', padx=10, expand=True, fill='x')
 
     def show_help_screen(self):
         self.clear_screen()
@@ -285,7 +300,7 @@ class MoodTrackerApp:
         self.create_nav_bar()
 
         content_frame = tk.Frame(self.root, bg="#ffffff")
-        content_frame.pack(expand=True, fill='both', padx=40, pady=30)
+        content_frame.pack(expand=True, fill='both', padx=20, pady=15)
 
         help_text = """краткая инструкция
 
@@ -310,10 +325,10 @@ class MoodTrackerApp:
         help_label = tk.Label(
             content_frame,
             text=help_text,
-            font=("Arial", 16),
+            font=("Arial", 12),
             bg="#ffffff",
             justify='left',
-            pady=20
+            pady=10
         )
         help_label.pack(expand=True)
 
@@ -324,18 +339,18 @@ class MoodTrackerApp:
         self.create_nav_bar()
 
         content_frame = tk.Frame(self.root, bg="#ffffff")
-        content_frame.pack(expand=True, fill='both', padx=40, pady=30)
+        content_frame.pack(expand=True, fill='both', padx=20, pady=15)
 
         title = tk.Label(
             content_frame,
             text="# как прошел день?",
-            font=("Arial", 28, "bold"),
+            font=("Arial", 22, "bold"),
             bg="#ffffff"
         )
-        title.pack(pady=20)
+        title.pack(pady=15)
 
         mood_frame = tk.Frame(content_frame, bg="#ffffff")
-        mood_frame.pack(pady=30)
+        mood_frame.pack(pady=20)
 
         self.selected_mood = tk.StringVar(value="")
 
@@ -349,64 +364,64 @@ class MoodTrackerApp:
             rb = tk.Radiobutton(
                 mood_frame,
                 text=label,
-                font=("Arial", 20),
+                font=("Arial", 16),
                 variable=self.selected_mood,
                 value=label,
                 bg=color,
-                padx=30,
-                pady=20,
+                padx=20,
+                pady=15,
                 relief='ridge',
-                bd=3,
+                bd=2,
                 selectcolor='white',
                 indicatoron=False,
                 cursor='hand2'
             )
-            rb.pack(side='left', padx=15, expand=True, fill='both')
+            rb.pack(side='left', padx=10, expand=True, fill='both')
 
         add_btn = tk.Button(
             content_frame,
             text="добавить заметку",
-            font=("Arial", 18, "bold"),
+            font=("Arial", 14, "bold"),
             bg="#2196F3",
             fg="white",
-            padx=40,
-            pady=15,
+            padx=30,
+            pady=12,
             relief='flat',
             cursor='hand2',
             command=self.show_add_comment_screen
         )
-        add_btn.pack(pady=30)
+        add_btn.pack(pady=20)
 
     def show_add_comment_screen(self):
         if not self.selected_mood.get():
             messagebox.showwarning("внимание", "пожалуйста, выберите настроение")
             return
 
-        comment_window = self.create_window("добавление заметки", 500, 400)
+        comment_window = self.create_window("добавление заметки", 450, 350)
 
         title = tk.Label(
             comment_window,
             text="опиши свой день",
-            font=("Arial", 18, "bold")
+            font=("Arial", 16, "bold")
         )
-        title.pack(pady=15)
+        title.pack(pady=12)
 
         text_area = tk.Text(
             comment_window,
-            font=("Arial", 14),
-            height=6,
-            width=40,
+            font=("Arial", 12),
+            height=5,
+            width=35,
             wrap='word',
             relief='solid',
             bd=2
         )
-        text_area.pack(pady=15, padx=30)
+        text_area.pack(pady=10, padx=20)
         text_area.focus()
 
         char_count = tk.Label(
             comment_window,
             text=f"0/{MAX_COMMENT_LENGTH}",
-            font=("Arial", 12),
+            font=("Arial", 10),
             fg="gray"
         )
         char_count.pack()
@@ -419,39 +434,14 @@ class MoodTrackerApp:
 
         text_area.bind('<KeyRelease>', update_char_count)
 
-        btn_frame = tk.Frame(comment_window)
-        btn_frame.pack(pady=20)
-
-        save_btn = tk.Button(
-            btn_frame,
-            text="сохранить",
-            font=("Arial", 14, "bold"),
-            bg="#4CAF50",
-            fg="white",
-            padx=30,
-            pady=10,
-            relief='flat',
-            cursor='hand2',
-            command=lambda: self.save_mood_record(
+        self.create_action_buttons(
+            comment_window,
+            save_command=lambda: self.save_mood_record(
                 text_area.get("1.0", "end-1c").strip(),
                 comment_window
-            )
+            ),
+            cancel_command=comment_window.destroy
         )
-        save_btn.pack(side='left', padx=10)
-
-        cancel_btn = tk.Button(
-            btn_frame,
-            text="отмена",
-            font=("Arial", 14),
-            bg="#f44336",
-            fg="white",
-            padx=30,
-            pady=10,
-            relief='flat',
-            cursor='hand2',
-            command=comment_window.destroy
-        )
-        cancel_btn.pack(side='left', padx=10)
 
     def save_mood_record(self, comment, window):
         mood = self.selected_mood.get()
@@ -485,27 +475,27 @@ class MoodTrackerApp:
         self.create_nav_bar()
 
         content_frame = tk.Frame(self.root, bg="#ffffff")
-        content_frame.pack(expand=True, fill='both', padx=40, pady=20)
+        content_frame.pack(expand=True, fill='both', padx=20, pady=10)
 
         title = tk.Label(
             content_frame,
             text="календарь настроения",
-            font=("Arial", 28, "bold"),
+            font=("Arial", 22, "bold"),
             bg="#ffffff"
         )
-        title.pack(pady=10)
+        title.pack(pady=8)
 
         subtitle = tk.Label(
             content_frame,
             text="(за последний месяц)",
-            font=("Arial", 14),
+            font=("Arial", 12),
             fg="gray",
             bg="#ffffff"
         )
         subtitle.pack()
 
         list_frame = tk.Frame(content_frame, bg="#ffffff")
-        list_frame.pack(expand=True, fill='both', pady=10)
+        list_frame.pack(expand=True, fill='both', pady=8)
 
         canvas = tk.Canvas(list_frame, bg="#ffffff", highlightthickness=0)
         scrollbar = tk.Scrollbar(list_frame, orient='vertical', command=canvas.yview)
@@ -525,11 +515,11 @@ class MoodTrackerApp:
             no_data = tk.Label(
                 scrollable_frame,
                 text="нет записей за последний месяц",
-                font=("Arial", 16),
+                font=("Arial", 14),
                 fg="gray",
                 bg="#ffffff"
             )
-            no_data.pack(pady=40)
+            no_data.pack(pady=30)
         else:
             records.sort(key=lambda x: x.get('date', ''), reverse=True)
             for record in records:
@@ -553,10 +543,10 @@ class MoodTrackerApp:
             bg="white",
             relief='ridge',
             bd=1,
-            padx=15,
-            pady=10
+            padx=10,
+            pady=8
         )
-        card.pack(fill='x', pady=5)
+        card.pack(fill='x', pady=3)
 
         top_frame = tk.Frame(card, bg="white")
         top_frame.pack(fill='x')
@@ -564,7 +554,7 @@ class MoodTrackerApp:
         mood_label = tk.Label(
             top_frame,
             text=mood,
-            font=("Arial", 16, "bold"),
+            font=("Arial", 14, "bold"),
             bg="white",
             fg=color
         )
@@ -573,7 +563,7 @@ class MoodTrackerApp:
         date_label = tk.Label(
             top_frame,
             text=record.get('date', '')[:16],
-            font=("Arial", 12),
+            font=("Arial", 10),
             bg="white",
             fg="gray"
         )
@@ -584,46 +574,46 @@ class MoodTrackerApp:
             comment_label = tk.Label(
                 card,
                 text=comment,
-                font=("Arial", 12),
+                font=("Arial", 10),
                 bg="white",
-                wraplength=600,
+                wraplength=350,
                 justify='left'
             )
-            comment_label.pack(anchor='w', pady=(5, 0))
+            comment_label.pack(anchor='w', pady=(3, 0))
 
         edit_btn = tk.Button(
             card,
             text="редактировать",
-            font=("Arial", 12),
+            font=("Arial", 10),
             bg="white",
             bd=0,
             fg="#2196F3",
             cursor='hand2',
             command=lambda r=record: self.show_edit_record_screen(r)
         )
-        edit_btn.pack(anchor='e', pady=(5, 0))
+        edit_btn.pack(anchor='e', pady=(3, 0))
 
     def show_edit_record_screen(self, record):
         self.current_record_id = record.get('id')
 
-        edit_window = self.create_window("внесенная запись", 500, 450)
+        edit_window = self.create_window("внесенная запись", 450, 400)
 
         title = tk.Label(
             edit_window,
             text="редактирование записи",
-            font=("Arial", 18, "bold")
+            font=("Arial", 16, "bold")
         )
-        title.pack(pady=15)
+        title.pack(pady=12)
 
         mood_frame = tk.Frame(edit_window)
-        mood_frame.pack(pady=15)
+        mood_frame.pack(pady=10)
 
         mood_label = tk.Label(
             mood_frame,
             text="настроение:",
-            font=("Arial", 14)
+            font=("Arial", 12)
         )
-        mood_label.pack(side='left', padx=10)
+        mood_label.pack(side='left', padx=8)
 
         selected_mood_edit = tk.StringVar(value=record.get('mood', ''))
 
@@ -633,82 +623,44 @@ class MoodTrackerApp:
             rb = tk.Radiobutton(
                 mood_frame,
                 text=label,
-                font=("Arial", 14),
+                font=("Arial", 12),
                 variable=selected_mood_edit,
                 value=label,
                 indicatoron=True,
                 cursor='hand2'
             )
-            rb.pack(side='left', padx=10)
+            rb.pack(side='left', padx=8)
 
         comment_label = tk.Label(
             edit_window,
             text="комментарий:",
-            font=("Arial", 14)
+            font=("Arial", 12)
         )
-        comment_label.pack(anchor='w', padx=30, pady=(15, 5))
+        comment_label.pack(anchor='w', padx=20, pady=(10, 5))
 
         text_area = tk.Text(
             edit_window,
-            font=("Arial", 14),
+            font=("Arial", 12),
             height=4,
-            width=45,
+            width=40,
             wrap='word',
             relief='solid',
             bd=2
         )
         text_area.insert("1.0", record.get('comment', ''))
-        text_area.pack(pady=5, padx=30)
+        text_area.pack(pady=5, padx=20)
 
-        btn_frame = tk.Frame(edit_window)
-        btn_frame.pack(pady=20)
-
-        save_btn = tk.Button(
-            btn_frame,
-            text="сохранить",
-            font=("Arial", 14, "bold"),
-            bg="#4CAF50",
-            fg="white",
-            padx=25,
-            pady=10,
-            relief='flat',
-            cursor='hand2',
-            command=lambda: self.update_record(
+        self.create_action_buttons(
+            edit_window,
+            save_command=lambda: self.update_record(
                 record,
                 selected_mood_edit.get(),
                 text_area.get("1.0", "end-1c").strip(),
                 edit_window
-            )
+            ),
+            cancel_command=edit_window.destroy,
+            delete_command=lambda: self.delete_record(record, edit_window)
         )
-        save_btn.pack(side='left', padx=10)
-
-        delete_btn = tk.Button(
-            btn_frame,
-            text="удалить",
-            font=("Arial", 14, "bold"),
-            bg="#f44336",
-            fg="white",
-            padx=25,
-            pady=10,
-            relief='flat',
-            cursor='hand2',
-            command=lambda: self.delete_record(record, edit_window)
-        )
-        delete_btn.pack(side='left', padx=10)
-
-        cancel_btn = tk.Button(
-            btn_frame,
-            text="отмена",
-            font=("Arial", 14),
-            bg="#9E9E9E",
-            fg="white",
-            padx=25,
-            pady=10,
-            relief='flat',
-            cursor='hand2',
-            command=edit_window.destroy
-        )
-        cancel_btn.pack(side='left', padx=10)
 
     def update_record(self, record, mood, comment, window):
         if not mood:
@@ -745,55 +697,55 @@ class MoodTrackerApp:
         self.create_nav_bar()
 
         content_frame = tk.Frame(self.root, bg="#ffffff")
-        content_frame.pack(expand=True, fill='both', padx=40, pady=20)
+        content_frame.pack(expand=True, fill='both', padx=20, pady=10)
 
         title = tk.Label(
             content_frame,
             text="аналитика",
-            font=("Arial", 28, "bold"),
+            font=("Arial", 22, "bold"),
             bg="#ffffff"
         )
-        title.pack(pady=10)
+        title.pack(pady=8)
 
         period_frame = tk.Frame(content_frame, bg="#ffffff")
-        period_frame.pack(pady=15)
+        period_frame.pack(pady=10)
 
         period_label = tk.Label(
             period_frame,
             text="выбери период:",
-            font=("Arial", 16),
+            font=("Arial", 12),
             bg="#ffffff"
         )
-        period_label.pack(side='left', padx=15)
+        period_label.pack(side='left', padx=10)
 
         self.selected_period = tk.StringVar(value="неделя")
 
         week_btn = tk.Radiobutton(
             period_frame,
             text="неделя",
-            font=("Arial", 16),
+            font=("Arial", 12),
             variable=self.selected_period,
             value="неделя",
             bg="#ffffff",
             cursor='hand2',
             command=self.show_analytics_period
         )
-        week_btn.pack(side='left', padx=15)
+        week_btn.pack(side='left', padx=10)
 
         month_btn = tk.Radiobutton(
             period_frame,
             text="месяц",
-            font=("Arial", 16),
+            font=("Arial", 12),
             variable=self.selected_period,
             value="месяц",
             bg="#ffffff",
             cursor='hand2',
             command=self.show_analytics_period
         )
-        month_btn.pack(side='left', padx=15)
+        month_btn.pack(side='left', padx=10)
 
         self.analytics_container = tk.Frame(content_frame, bg="#ffffff")
-        self.analytics_container.pack(expand=True, fill='both', pady=15)
+        self.analytics_container.pack(expand=True, fill='both', pady=10)
 
         self.show_analytics_period()
 
@@ -810,7 +762,7 @@ class MoodTrackerApp:
             no_data = tk.Label(
                 self.analytics_container,
                 text="нет данных за выбранный период",
-                font=("Arial", 20),
+                font=("Arial", 16),
                 fg="gray",
                 bg="#ffffff"
             )
@@ -833,13 +785,13 @@ class MoodTrackerApp:
         period_label = tk.Label(
             self.analytics_container,
             text=f"статистика за {period}",
-            font=("Arial", 18, "bold"),
+            font=("Arial", 14, "bold"),
             bg="#ffffff"
         )
         period_label.pack(pady=5)
 
         chart_frame = tk.Frame(self.analytics_container, bg="#ffffff")
-        chart_frame.pack(expand=True, fill='both', pady=15)
+        chart_frame.pack(expand=True, fill='both', pady=10)
 
         max_count = max(mood_counts.values()) if max(mood_counts.values()) > 0 else 1
 
@@ -851,23 +803,23 @@ class MoodTrackerApp:
 
         for mood, count in mood_counts.items():
             frame = tk.Frame(chart_frame, bg="#ffffff")
-            frame.pack(side='left', expand=True, fill='both', padx=10)
+            frame.pack(side='left', expand=True, fill='both', padx=8)
 
-            height = int((count / max_count) * 200) if max_count > 0 else 0
+            height = int((count / max_count) * 150) if max_count > 0 else 0
             height = max(height, 10) if count > 0 else 0
 
             bar = tk.Frame(
                 frame,
                 bg=colors.get(mood, "#9E9E9E"),
                 height=height,
-                width=60
+                width=50
             )
-            bar.pack(side='bottom', pady=5)
+            bar.pack(side='bottom', pady=3)
 
             count_label = tk.Label(
                 frame,
                 text=str(count),
-                font=("Arial", 16, "bold"),
+                font=("Arial", 12, "bold"),
                 bg="#ffffff"
             )
             count_label.pack()
@@ -875,7 +827,7 @@ class MoodTrackerApp:
             mood_label = tk.Label(
                 frame,
                 text=mood,
-                font=("Arial", 14),
+                font=("Arial", 11),
                 bg="#ffffff"
             )
             mood_label.pack()
@@ -883,11 +835,11 @@ class MoodTrackerApp:
         total_label = tk.Label(
             self.analytics_container,
             text=f"всего записей: {total}",
-            font=("Arial", 14),
+            font=("Arial", 12),
             fg="gray",
             bg="#ffffff"
         )
-        total_label.pack(pady=10)
+        total_label.pack(pady=8)
 
 
 def main():
