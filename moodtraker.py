@@ -44,7 +44,6 @@ class MoodTrackerApp:
             self.mood_images["так себе"] = tk.PhotoImage(file="okay.png")
         except Exception as e:
             print(f"не удалось загрузить картинки: {e}")
-            # если картинок нет - работаем без них
 
         # хранилище данных
         self.data_path = get_data_path()
@@ -311,6 +310,21 @@ class MoodTrackerApp:
         content_frame = tk.Frame(self.root, bg="#ffffff")
         content_frame.pack(expand=True, fill='both', padx=20, pady=15)
 
+        # кнопка назад на главный экран
+        back_btn = tk.Button(
+            content_frame,
+            text="← назад",
+            font=("Arial", 12),
+            bg="#9E9E9E",
+            fg="white",
+            padx=15,
+            pady=8,
+            relief='flat',
+            cursor='hand2',
+            command=self.show_main_screen
+        )
+        back_btn.pack(anchor='nw', pady=(0, 10))
+
         help_text = """краткая инструкция
 
 1. как выбрать настроение:
@@ -370,20 +384,16 @@ class MoodTrackerApp:
         ]
 
         for label, color in moods:
-            # рамка для картинки
             frame = tk.Frame(mood_frame, bg=color, relief='ridge', bd=3, padx=15, pady=10)
             frame.pack(side='left', padx=10, expand=True, fill='both')
 
-            # если есть картинка - показываем её
             if label in self.mood_images:
                 img_label = tk.Label(frame, image=self.mood_images[label], bg=color)
                 img_label.pack(pady=5)
             else:
-                # если картинки нет - показываем текст
                 text_label = tk.Label(frame, text=label, font=("Arial", 16), bg=color)
                 text_label.pack(pady=5)
 
-            # радиокнопка (текст под картинкой)
             rb = tk.Radiobutton(
                 frame,
                 text=label,
@@ -571,7 +581,6 @@ class MoodTrackerApp:
         top_frame = tk.Frame(card, bg="white")
         top_frame.pack(fill='x')
 
-        # левая часть - картинка
         left_frame = tk.Frame(top_frame, bg="white")
         left_frame.pack(side='left')
 
@@ -579,7 +588,6 @@ class MoodTrackerApp:
             img = tk.Label(left_frame, image=self.mood_images[mood], bg="white")
             img.pack(side='left')
 
-        # название настроения
         mood_label = tk.Label(
             left_frame,
             text=mood,
