@@ -53,7 +53,7 @@ class MoodTrackerApp:
         # текущие данные
         self.user_name = ""
         self.mood_records = []
-        self.current_record_id = None
+        self.current_record = None
 
         # загрузка профиля
         self.load_profile()
@@ -150,55 +150,6 @@ class MoodTrackerApp:
             command=command
         )
         return btn
-
-    def create_action_buttons(self, parent, save_command, cancel_command, delete_command=None):
-        btn_frame = tk.Frame(parent)
-        btn_frame.pack(pady=20)
-
-        save_btn = tk.Button(
-            btn_frame,
-            text="сохранить",
-            font=("Arial", 12, "bold"),
-            bg="#4CAF50",
-            fg="white",
-            padx=20,
-            pady=8,
-            relief='flat',
-            cursor='hand2',
-            command=save_command
-        )
-        save_btn.pack(side='left', padx=10)
-
-        if delete_command:
-            delete_btn = tk.Button(
-                btn_frame,
-                text="удалить",
-                font=("Arial", 12, "bold"),
-                bg="#f44336",
-                fg="white",
-                padx=20,
-                pady=8,
-                relief='flat',
-                cursor='hand2',
-                command=delete_command
-            )
-            delete_btn.pack(side='left', padx=10)
-
-        cancel_btn = tk.Button(
-            btn_frame,
-            text="отмена",
-            font=("Arial", 12),
-            bg="#9E9E9E",
-            fg="white",
-            padx=20,
-            pady=8,
-            relief='flat',
-            cursor='hand2',
-            command=cancel_command
-        )
-        cancel_btn.pack(side='left', padx=10)
-
-        return btn_frame
 
     def show_welcome_screen(self):
         self.clear_screen()
@@ -301,7 +252,6 @@ class MoodTrackerApp:
         content_frame = tk.Frame(self.root, bg="#ffffff")
         content_frame.pack(expand=True, fill='both', padx=20, pady=15)
 
-        # кнопка назад на главный экран
         back_btn = tk.Button(
             content_frame,
             text="← назад",
@@ -425,6 +375,20 @@ class MoodTrackerApp:
 
         content_frame = tk.Frame(self.root, bg="#ffffff")
         content_frame.pack(expand=True, fill='both', padx=20, pady=15)
+
+        back_btn = tk.Button(
+            content_frame,
+            text="← назад",
+            font=("Arial", 12),
+            bg="#9E9E9E",
+            fg="white",
+            padx=15,
+            pady=8,
+            relief='flat',
+            cursor='hand2',
+            command=self.show_today_screen
+        )
+        back_btn.pack(anchor='nw', pady=(0, 10))
 
         title = tk.Label(
             content_frame,
@@ -653,29 +617,46 @@ class MoodTrackerApp:
         edit_btn.pack(anchor='e', pady=(3, 0))
 
     def show_edit_record_screen(self, record):
-        self.current_record_id = record.get('id')
+        self.current_record = record
 
-        edit_window = tk.Toplevel(self.root)
-        edit_window.title("внесенная запись")
-        edit_window.geometry("450x400")
-        edit_window.resizable(False, False)
-        edit_window.grab_set()
-        edit_window.transient(self.root)
+        self.clear_screen()
+        self.load_records()
+
+        self.create_nav_bar()
+
+        content_frame = tk.Frame(self.root, bg="#ffffff")
+        content_frame.pack(expand=True, fill='both', padx=20, pady=15)
+
+        back_btn = tk.Button(
+            content_frame,
+            text="← назад",
+            font=("Arial", 12),
+            bg="#9E9E9E",
+            fg="white",
+            padx=15,
+            pady=8,
+            relief='flat',
+            cursor='hand2',
+            command=self.show_history_screen
+        )
+        back_btn.pack(anchor='nw', pady=(0, 10))
 
         title = tk.Label(
-            edit_window,
+            content_frame,
             text="редактирование записи",
-            font=("Arial", 16, "bold")
+            font=("Arial", 16, "bold"),
+            bg="#ffffff"
         )
         title.pack(pady=12)
 
-        mood_frame = tk.Frame(edit_window)
+        mood_frame = tk.Frame(content_frame, bg="#ffffff")
         mood_frame.pack(pady=10)
 
         mood_label = tk.Label(
             mood_frame,
             text="настроение:",
-            font=("Arial", 12)
+            font=("Arial", 12),
+            bg="#ffffff"
         )
         mood_label.pack(side='left', padx=8)
 
@@ -690,20 +671,22 @@ class MoodTrackerApp:
                 font=("Arial", 12),
                 variable=selected_mood_edit,
                 value=label,
+                bg="#ffffff",
                 indicatoron=True,
                 cursor='hand2'
             )
             rb.pack(side='left', padx=8)
 
         comment_label = tk.Label(
-            edit_window,
+            content_frame,
             text="комментарий:",
-            font=("Arial", 12)
+            font=("Arial", 12),
+            bg="#ffffff"
         )
         comment_label.pack(anchor='w', padx=20, pady=(10, 5))
 
         text_area = tk.Text(
-            edit_window,
+            content_frame,
             font=("Arial", 12),
             height=4,
             width=40,
@@ -713,20 +696,58 @@ class MoodTrackerApp:
         )
         text_area.insert("1.0", record.get('comment', ''))
         text_area.pack(pady=5, padx=20)
+        text_area.focus()
 
-        self.create_action_buttons(
-            edit_window,
-            save_command=lambda: self.update_record(
+        btn_frame = tk.Frame(content_frame, bg="#ffffff")
+        btn_frame.pack(pady=20)
+
+        save_btn = tk.Button(
+            btn_frame,
+            text="сохранить",
+            font=("Arial", 12, "bold"),
+            bg="#4CAF50",
+            fg="white",
+            padx=20,
+            pady=8,
+            relief='flat',
+            cursor='hand2',
+            command=lambda: self.update_record(
                 record,
                 selected_mood_edit.get(),
-                text_area.get("1.0", "end-1c").strip(),
-                edit_window
-            ),
-            cancel_command=edit_window.destroy,
-            delete_command=lambda: self.delete_record(record, edit_window)
+                text_area.get("1.0", "end-1c").strip()
+            )
         )
+        save_btn.pack(side='left', padx=10)
 
-    def update_record(self, record, mood, comment, window):
+        delete_btn = tk.Button(
+            btn_frame,
+            text="удалить",
+            font=("Arial", 12, "bold"),
+            bg="#f44336",
+            fg="white",
+            padx=20,
+            pady=8,
+            relief='flat',
+            cursor='hand2',
+            command=lambda: self.delete_record(record)
+        )
+        delete_btn.pack(side='left', padx=10)
+
+        cancel_btn = tk.Button(
+            btn_frame,
+            text="отмена",
+            font=("Arial", 12),
+            bg="#9E9E9E",
+            fg="white",
+            padx=20,
+            pady=8,
+            relief='flat',
+            cursor='hand2',
+            command=self.show_history_screen
+        )
+        cancel_btn.pack(side='left', padx=10)
+
+    def update_record(self, record, mood, comment):
         if not mood:
             messagebox.showwarning("внимание", "выберите настроение")
             return
@@ -742,15 +763,13 @@ class MoodTrackerApp:
                 break
 
         self.save_records()
-        window.destroy()
         messagebox.showinfo("успех", "запись обновлена!")
         self.show_history_screen()
 
-    def delete_record(self, record, window):
+    def delete_record(self, record):
         if messagebox.askyesno("подтверждение", "вы уверены, что хотите удалить эту запись?"):
             self.mood_records = [r for r in self.mood_records if r.get('id') != record.get('id')]
             self.save_records()
-            window.destroy()
             messagebox.showinfo("успех", "запись удалена!")
             self.show_history_screen()
 
