@@ -151,15 +151,6 @@ class MoodTrackerApp:
         )
         return btn
 
-    def create_window(self, title, width=500, height=400):
-        window = tk.Toplevel(self.root)
-        window.title(title)
-        window.geometry(f"{width}x{height}")
-        window.resizable(False, False)
-        window.grab_set()
-        window.transient(self.root)
-        return window
-
     def create_action_buttons(self, parent, save_command, cancel_command, delete_command=None):
         btn_frame = tk.Frame(parent)
         btn_frame.pack(pady=20)
@@ -427,20 +418,27 @@ class MoodTrackerApp:
             messagebox.showwarning("внимание", "пожалуйста, выберите настроение")
             return
 
-        comment_window = self.create_window("добавление заметки", 450, 350)
+        self.clear_screen()
+        self.load_records()
+
+        self.create_nav_bar()
+
+        content_frame = tk.Frame(self.root, bg="#ffffff")
+        content_frame.pack(expand=True, fill='both', padx=20, pady=15)
 
         title = tk.Label(
-            comment_window,
+            content_frame,
             text="опиши свой день",
-            font=("Arial", 16, "bold")
+            font=("Arial", 16, "bold"),
+            bg="#ffffff"
         )
         title.pack(pady=12)
 
         text_area = tk.Text(
-            comment_window,
+            content_frame,
             font=("Arial", 12),
             height=5,
-            width=35,
+            width=40,
             wrap='word',
             relief='solid',
             bd=2
@@ -449,10 +447,11 @@ class MoodTrackerApp:
         text_area.focus()
 
         char_count = tk.Label(
-            comment_window,
+            content_frame,
             text=f"0/{MAX_COMMENT_LENGTH}",
             font=("Arial", 10),
-            fg="gray"
+            fg="gray",
+            bg="#ffffff"
         )
         char_count.pack()
 
@@ -464,16 +463,40 @@ class MoodTrackerApp:
 
         text_area.bind('<KeyRelease>', update_char_count)
 
-        self.create_action_buttons(
-            comment_window,
-            save_command=lambda: self.save_mood_record(
-                text_area.get("1.0", "end-1c").strip(),
-                comment_window
-            ),
-            cancel_command=comment_window.destroy
-        )
+        btn_frame = tk.Frame(content_frame, bg="#ffffff")
+        btn_frame.pack(pady=20)
 
-    def save_mood_record(self, comment, window):
+        save_btn = tk.Button(
+            btn_frame,
+            text="сохранить",
+            font=("Arial", 12, "bold"),
+            bg="#4CAF50",
+            fg="white",
+            padx=20,
+            pady=8,
+            relief='flat',
+            cursor='hand2',
+            command=lambda: self.save_mood_record(
+                text_area.get("1.0", "end-1c").strip()
+            )
+        )
+        save_btn.pack(side='left', padx=10)
+
+        cancel_btn = tk.Button(
+            btn_frame,
+            text="отмена",
+            font=("Arial", 12),
+            bg="#9E9E9E",
+            fg="white",
+            padx=20,
+            pady=8,
+            relief='flat',
+            cursor='hand2',
+            command=self.show_today_screen
+        )
+        cancel_btn.pack(side='left', padx=10)
+
+    def save_mood_record(self, comment):
         mood = self.selected_mood.get()
 
         if not mood:
@@ -494,7 +517,6 @@ class MoodTrackerApp:
         self.mood_records.append(record)
         self.save_records()
 
-        window.destroy()
         messagebox.showinfo("успех", "запись сохранена!")
         self.show_main_screen()
 
@@ -633,7 +655,12 @@ class MoodTrackerApp:
     def show_edit_record_screen(self, record):
         self.current_record_id = record.get('id')
 
-        edit_window = self.create_window("внесенная запись", 450, 400)
+        edit_window = tk.Toplevel(self.root)
+        edit_window.title("внесенная запись")
+        edit_window.geometry("450x400")
+        edit_window.resizable(False, False)
+        edit_window.grab_set()
+        edit_window.transient(self.root)
 
         title = tk.Label(
             edit_window,
