@@ -208,40 +208,33 @@ class MoodTrackerApp:
         self.clear_screen()
         self.load_records()
 
+        # навигационная панель
         self.create_nav_bar()
 
+        # основной контент - размещаем строго по центру
         content_frame = tk.Frame(self.root, bg="#ffffff")
-        content_frame.pack(expand=True, fill='both', padx=20, pady=20)
+        content_frame.pack(expand=True, fill='both')
+
+        # создаем фрейм для текста, который будет по центру
+        center_frame = tk.Frame(content_frame, bg="#ffffff")
+        center_frame.place(relx=0.5, rely=0.5, anchor='center')
 
         greeting = tk.Label(
-            content_frame,
+            center_frame,
             text=f"привет, {self.user_name}! :)",
             font=("Arial", 28, "bold"),
             bg="#ffffff"
         )
-        greeting.pack(pady=15)
+        greeting.pack(pady=5)
 
         question = tk.Label(
-            content_frame,
-            text="как твое настроение\nсегодня? :)",
+            center_frame,
+            text="как твое настроение\nсегодня?",
             font=("Arial", 18),
             bg="#ffffff",
             justify='center'
         )
-        question.pack(pady=15)
-
-        btn_frame = tk.Frame(content_frame, bg="#ffffff")
-        btn_frame.pack(pady=25)
-
-        buttons = [
-            ("сегодня", "#2196F3", self.show_today_screen),
-            ("календарь", "#FF9800", self.show_history_screen),
-            ("аналитика", "#9C27B0", self.show_analytics_screen)
-        ]
-
-        for text, color, command in buttons:
-            btn = self.create_style_button(btn_frame, text, color, command)
-            btn.pack(side='left', padx=10, expand=True, fill='x')
+        question.pack(pady=5)
 
     def show_help_screen(self):
         self.clear_screen()
